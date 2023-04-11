@@ -8,6 +8,10 @@
   - [목차](#목차)
   - [Command](#command)
   - [Entrypoint와 Command](#entrypoint와-command)
+  - [volume](#volume)
+    - [Host volume](#host-volume)
+    - [Volume Container](#volume-container)
+    - [Docker volume](#docker-volume)
 
 ## Command
 
@@ -98,3 +102,92 @@ docker container prune
 ## Entrypoint와 Command
 
 - 고정적으로 지정된 명령어 수행
+
+```bash
+docker run --entrypoint sh ubuntu
+docker run --entrypoint echo ubuntu hello
+```
+
+- entrypoint를 통해 command가 실행된 후 중지 됨
+
+```bash
+docker run -help
+```
+
+```bash
+docker run -it -e MY_HOST=1.1.1.1 ubuntu bash
+exit
+```
+
+- `docker run` 함
+- `it` 요소로 들어감
+- `e` 환경 변수로 호스트를 넘김
+- `ubuntu` 우분투로
+- `bash` bash 실행
+
+```bash
+nano sample.env
+cat sample.env
+```
+
+- sample.env 내부에는 `MY_HOST=1.1.1.1` 작성
+
+```bash
+docker run -it --env-file sample.env ubuntu env  
+```
+
+- 환경요소를 사용할 수 있음
+
+```bash
+docker run -d --name my-nginx -p 80:80 nginx
+docker exec -it my-nginx bash
+docker exec -it my-nginx env
+```
+
+- exec를 통해 명령어를 실행함
+
+```bash
+docker run --expose 80 nginx
+```
+
+- port를 사용하겠다는 선언만 함
+
+---
+
+## volume
+
+- container와 상관없이 저장되어야 하는 파일을 보관하기 위한 기법
+
+### Host volume
+
+```bash
+docker run -d -it -p 8080:80 --name my-nginx nginx:1.23
+
+docker run -d -it -p 8080:80 -v ${pwd}/html:/usr/share/nginx/html --name my-nginx nginx:1.23
+
+docker run -d -it -p 8080:80 -v /home/user/docker/html:/usr/share/nginx/html --name my-nginx2 nginx:1.23
+```
+
+### Volume Container
+
+```bash
+docker run -d --name my-volume -it -v /home/user/docker/html:/usr/share/nginx/html ubuntu
+
+docker run -d -p 8090:80 --name my-nginx2 --volumes-from=my-volume nginx
+```
+
+### Docker volume
+
+```bash
+docker volume ls
+
+docker volume create --name test-db
+
+docker run -d --name my-sql -v test-db:/var/lib/mysql -p 3307:3306 mysql:5.7
+
+docker run -d --name my-sql -v test-db:/var/lib/mysql -p 3307:3306 --platform linux/amd64 mysql:5.7
+
+docker run -d --name my-sql -v test-db:/var/lib/mysql -p 3307:3306 --platform linux/amd64 -e MYSQL_ROOT_PASSWORD=1234 mysql:5.7
+
+docker volume rm [볼륨 이름]
+```
