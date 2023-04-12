@@ -1,193 +1,161 @@
-# Docker 사용법 여행기
-
----
+# 2일차
 
 ## 목차
 
-- [Docker 사용법 여행기](#docker-사용법-여행기)
+- [2일차](#2일차)
   - [목차](#목차)
-  - [Command](#command)
-  - [Entrypoint와 Command](#entrypoint와-command)
-  - [volume](#volume)
-    - [Host volume](#host-volume)
-    - [Volume Container](#volume-container)
-    - [Docker volume](#docker-volume)
-
-## Command
-
-```bash
-docker pull nginx:1.21
-```
-
-- docker의 images를 다운받는다.
+  - [images](#images)
+  - [실습](#실습)
+    - [tensorflow](#tensorflow)
+    - [miniconda3](#miniconda3)
+    - [jupyter notebook](#jupyter-notebook)
+  - [Dockerfile 상세](#dockerfile-상세)
+  - [연습](#연습)
+    - [python](#python)
+  - [docker-compose](#docker-compose)
 
 ```bash
-docker images
+docker logs my-nginx
+docker logs --tail 5 my-nginx
+docker logs -f my-nginx
+docker logs -f -t my-nginx
 ```
 
-- docker images 확인
-
-```bash
-docker run nginx:1.21
-```
-
-- images를 통해 실행함
-
-```bash
-docker run \
-    -i \
-    -t \
-    --rm \
-    -d \
-    --name hello \
-    -p 80:80 \
-    -v /opt/example:/exmaple \
-```
-
-- 추가적인 요소를 넣어서 돌릴 수 있음
-  - 표준 입력
-  - TTY
-  - 실행 종료 후 삭제
-  - 백그라운드 모드
-  - 이름 지정
-  - 포트 바인딩
-  - 볼륨 바인딩
-  - 실행 이미지
-  - 실행 명령어
-
-```bash
-docker ps
-docker ps -a
-```
-
-- 실행 중인 container 확인
-
-```bash
-dock stop [컨테이너 이름]
-```
-
-- 컨테이너 종료
-
-```bash
-docker inspect [컨테이너 이름]
-```
-
-- 상세한 정보를 확인할 수 있음
-
-```bash
-docker pause [컨테이너 이름]
-docker unpause [컨테이너 이름]
-```
-
-- 리소스 제공을 중지하거나 재개함
-
-```bash
-docker kill [컨테이너 이름]
-```
-
-- 컨테이너 강제 종료
-
-```bash
-docker rm -f [컨테이너 이름]
-```
-
-- 컨테이너 삭제
-
-```bash
-docker container prune
-```
-
-- 실행 중인 컨테이너를 제외한 모든 컨테이너 삭제
-
-## Entrypoint와 Command
-
-- 고정적으로 지정된 명령어 수행
-
-```bash
-docker run --entrypoint sh ubuntu
-docker run --entrypoint echo ubuntu hello
-```
-
-- entrypoint를 통해 command가 실행된 후 중지 됨
-
-```bash
-docker run -help
-```
-
-```bash
-docker run -it -e MY_HOST=1.1.1.1 ubuntu bash
-exit
-```
-
-- `docker run` 함
-- `it` 요소로 들어감
-- `e` 환경 변수로 호스트를 넘김
-- `ubuntu` 우분투로
-- `bash` bash 실행
-
-```bash
-nano sample.env
-cat sample.env
-```
-
-- sample.env 내부에는 `MY_HOST=1.1.1.1` 작성
-
-```bash
-docker run -it --env-file sample.env ubuntu env  
-```
-
-- 환경요소를 사용할 수 있음
-
-```bash
-docker run -d --name my-nginx -p 80:80 nginx
-docker exec -it my-nginx bash
-docker exec -it my-nginx env
-```
-
-- exec를 통해 명령어를 실행함
-
-```bash
-docker run --expose 80 nginx
-```
-
-- port를 사용하겠다는 선언만 함
+- docker logs 확인
 
 ---
 
-## volume
-
-- container와 상관없이 저장되어야 하는 파일을 보관하기 위한 기법
-
-### Host volume
+## images
 
 ```bash
-docker run -d -it -p 8080:80 --name my-nginx nginx:1.23
-
-docker run -d -it -p 8080:80 -v ${pwd}/html:/usr/share/nginx/html --name my-nginx nginx:1.23
-
-docker run -d -it -p 8080:80 -v /home/user/docker/html:/usr/share/nginx/html --name my-nginx2 nginx:1.23
+docker image inspect nginx
 ```
 
-### Volume Container
+docker의 이미지의 상세 내역을 확인할 수 있음
 
 ```bash
-docker run -d --name my-volume -it -v /home/user/docker/html:/usr/share/nginx/html ubuntu
+docker run -it --name my-ubuntu ubuntu
 
-docker run -d -p 8090:80 --name my-nginx2 --volumes-from=my-volume nginx
+echo hello ubuntu > my_file
+
+exit
+
+docker start my-ubuntu 
+
+docker commit -a byeongryul -m "add my_file" my-ubuntu my-ubuntu:v1.0.0
 ```
 
-### Docker volume
+- images 만들기
+
+```Dockerfile
+FROM ubuntu:20.04
+RUN apt-get update
+CMD ["echo", "Hello Ubuntu"]
+```
 
 ```bash
-docker volume ls
+docker build -t my-app:v1 .
+```
 
-docker volume create --name test-db
+- 위 Docker 파일을 토대로 image를 생성함
 
-docker run -d --name my-sql -v test-db:/var/lib/mysql -p 3307:3306 mysql:5.7
+```bash
+touch .dockerignore
 
-docker run -d --name my-sql -v test-db:/var/lib/mysql -p 3307:3306 --platform linux/amd64 mysql:5.7
+*/tmep*
+*/*/temp*
+temp?
+*.md
+!README.md
+```
 
-docker run -d --name my-sql -v test-db:/var/lib/mysql -p 3307:3306 --platform linux/amd64 -e MYSQL_ROOT_PASSWORD=1234 mysql:5.7
+- 올리지 않을 요소를 지정할 수 있음
 
-docker volume rm [볼륨 이름]
+```bash
+docker save -o my-ubuntu.tar  my-ubuntu
+docker load -i my-ubuntu.tar
+```
+
+도커 공유와 삭제
+
+---
+
+## 실습
+
+### tensorflow
+
+1. pull 이미지 가져오기
+2. run 컨테이너 실행
+3. 컨테이너 접속 후 python 실행
+4. 디바이스 목록 확인
+
+```bash
+docker pull tensorflow/tensorflow
+docker run --name my-tensorflow2 tensorflow/tensorflow
+docker run --name my-tensorflow -it tensorflow/tensorflow bash   
+
+python3
+from tensorflow.python.client import device_lib
+device_lib.list_local_devices()
+```
+
+### miniconda3
+
+1. pull
+2. run
+3. 활성 유무
+4. pandas와 numpy 버전 확인
+
+```bash
+docker pull continuumio/miniconda3
+docker run --name my-conda -it continuumio/miniconda3 bash
+
+conda install pandas -y
+conda list | grep -E "pandas|numpy"
+```
+
+### jupyter notebook
+
+1. 앞선 컨테이너에 jupyter 설치
+
+```bash
+docker run --name my-conda-port -p 8888:8888 -it continuumio/miniconda3 bash
+
+conda install pandas jupyter -y
+jupyter notebook --allow-root --no-browser --ip 0.0.0.0
+```
+
+## Dockerfile 상세
+
+```dockerfile
+FROM
+LABEL maintainer="128592asp@gmail.com"
+LABEL version="1.0.0"
+LABEL description="연습"
+RUN mkdir container
+COPY ./local ./container
+CMD ["echo", "ubuntu"]
+# 명시적 약속
+EXPOSE 8080 
+# 환경 설정
+ENV PATH=.
+```
+
+---
+
+## 연습
+
+### python
+
+1. dockerfile 만들기
+2. python 베이스로 빌드하기
+
+---
+
+## docker-compose
+
+- 프로그램을 전체가 관리할 수 있도록 함
+
+```bash
+docker-compose up -d --scale web=3
 ```
