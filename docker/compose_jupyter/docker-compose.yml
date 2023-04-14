@@ -1,0 +1,22 @@
+version: '1.0.0'
+
+services:
+  jupyter-ds:
+    platform: linux/amd64 # prevent error m1 mac
+    build: .
+    ports:
+      - 8890:8888
+    restart : always
+    depends_on :
+      - jupyter-engineer
+    volumes:
+      - ./ds_work:/home/jovyan/work
+  
+  jupyter-engineer:
+    platform: linux/amd64 # prevent error m1 mac
+    build: .
+    ports:
+      - 8899:8888
+    restart : always
+    volumes:
+      - ./de_work:/home/jovyan/work
