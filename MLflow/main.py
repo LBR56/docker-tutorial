@@ -25,6 +25,8 @@ def eval_metrics(actual, pred):
 
 
 if __name__ == "__main__":
+
+    mlflow.set_experiment("V1")
     warnings.filterwarnings("ignore")
     np.random.seed(40)
 

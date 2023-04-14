@@ -1,11 +1,11 @@
 venv
 __pycache__
 db_data
-.env
-.*
 
 # MLflow
 mlruns
 outputs
+mlartifacts
 
 mongodb
+

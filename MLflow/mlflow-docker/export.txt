@@ -1,0 +1,4 @@
+export AWS_ACCESS_KEY_ID=admin
+export AWS_SECRET_ACCESS_KEY=sample_key
+export MLFLOW_S3_ENDPOINT_URL=http://localhost:9000
+export MLFLOW_TRACKING_URI=http://localhost:5080
