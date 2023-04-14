@@ -24,7 +24,7 @@ pipeline {
 		stage("test") {
             when {
                 expression {
-                    env.GIT_BRANCH == 'origin/test' || env.GIT_BRANCH == ''
+                    params.executeTests
                 }
             }
 			steps {
@@ -36,6 +36,7 @@ pipeline {
 				echo 'deploying the applicaiton...'
                 echo "deploying with ${ADMIN_CREDENTIALS}"
                 sh 'printf ${ADMIN_CREDENTIALS}'
+                echo "deploying version ${params.VERSION}"
 			}
 		}
 	}
